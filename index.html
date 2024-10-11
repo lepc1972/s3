@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario Nombres</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Formulario de Bienvenida</h1>
+        <form id="nameForm">
+            <label for="name">Ingresa tu nombre:</label>
+            <input type="text" id="name" name="name" required>
+            <button type="submit">Enviar</button>
+        </form>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        document.getElementById('nameForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const message = `Hola ${name}, estás en el bucket de Luis Eduardo Pacheco.`;
+            document.getElementById('message').textContent = message;
+        });
+    </script>
+</body>
+</html>

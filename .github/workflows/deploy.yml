@@ -1,0 +1,46 @@
+name: Deploy Nginx to S3
+
+on:
+  push:
+    branches:
+      - '*'  # Ejecuta la acción para cualquier cambio en cualquier rama
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to AWS CLI
+      run: |
+        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws configure set region ${{ secrets.AWS_REGION }}
+
+    - name: Build Docker Image
+      run: |
+        docker build -t my-nginx-app .
+
+    - name: Run Nginx Container
+      run: |
+        docker run -d -p 8080:80 --name nginx-app my-nginx-app
+      id: nginx
+
+    - name: Test Nginx
+      run: |
+        curl --fail http://localhost:8080 || exit 1
+
+    - name: Upload to S3
+      run: |
+        aws s3 sync . s3://${{ secrets.AWS_BUCKET_NAME }} --acl public-read
+        aws s3 website s3://${{ secrets.AWS_BUCKET_NAME }} --index-document index.html
+
+    - name: Stop and Remove Docker Container
+      run: |
+        docker stop nginx-app
+        docker rm nginx-app
